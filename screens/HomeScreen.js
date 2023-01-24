@@ -1,8 +1,7 @@
 import React, { useEffect } from "react";
-import { View, Text, SafeAreaView, Image, TouchableOpacity, Platform } from "react-native";
+import { View, Text, SafeAreaView, Image, TouchableOpacity } from "react-native";
 import Swiper from 'react-native-deck-swiper';
 import styles from './Styles';
-import catImage from '../assets/cat.png';
 import { Entypo, Fontisto, Feather } from '@expo/vector-icons';
 import tw from "tailwind-rn";
 import Switch from 'react-native-switch-toggles';
@@ -12,16 +11,12 @@ import api from '../utils/api';
 global.__reanimatedWorkletInit = () => { };
 const HomeScreen = () => {
     const [isEnabled, setIsEnabled] = React.useState(false);
-    const [catName, setCatName] = React.useState('');
-    const [catCountry, setCatCountry] = React.useState('');
-    const [adaptability, setAdaptability] = React.useState('');
-    const [catUrlImage, setCatUrlImage] = React.useState('');
     const [data, setData] = React.useState([
         {
             id: 1,
             name: 'cat',
             origin: 'cat',
-            adaptability: 'cat',
+            affection_level: 'cat',
             image: 'cat',
             reference_image_id: 'cat'
         }
@@ -32,22 +27,12 @@ const HomeScreen = () => {
         return <View style={styles.item}>{renderContent()}</View>;
     };
 
-
     const onSwiped = (cardIndex) => {
 
-        // api.get(`v1/images/${data[cardIndex].id}`).then((res) => {
-        //     console.log(res.data);
-        //     setCatUrlImage(res.data.url);
-
-        // }).catch((error) => {
-        //     console.log(error);
-        // }
-        // );
         console.log(cardIndex)
         api.post('v1/votes/', {
             "image_id": data[cardIndex].reference_image_id,
             "value": 1,
-            // "sub_id": "demo-1b1b1b1"
         }).then((response) => {
             console.log("like", response.data);
         }
@@ -56,56 +41,35 @@ const HomeScreen = () => {
         }
         );
 
-
-
     }
-
-    //
-
-
 
 
     useEffect(() => {
-        api.get('v1/breeds').then((response) => {
+        async function fetchData() {
+            api.get('v1/breeds').then((response) => {
 
-            setData(response.data.map((item, index) => {
-                if (item?.image?.url) {
+                setData(response.data.map((item, index) => {
+                    if (item?.image?.url) {
 
-                    return {
-                        id: item.id,
-                        name: item.name,
-                        origin: item.origin,
-                        adaptability: item.adaptability,
-                        image: item.image.url,
-                        reference_image_id: item.reference_image_id
+                        return {
+                            id: item.id,
+                            name: item.name,
+                            origin: item.origin,
+                            affection_level: item.affection_level,
+                            image: item.image.url,
+                            reference_image_id: item.reference_image_id
+                        }
                     }
                 }
-            }
-            ))
-            // console.log(response.data[0].image.url);
-            // console.log(response.data);
-//expo clear comando para limpar cache
+                ))
 
 
+            }).catch((error) => {
+                console.log(error);
+            });
+        }
+        fetchData();
 
-
-            // api.get(`v1/images/${response.data[0].reference_image_id}`).then((res) => {
-            //     console.log(res.data.url);
-            //     setCatUrlImage(res.data.url);
-            //     setCatUrlImage(catImage);
-            //     setCatName(res.data.breeds[0].name);
-            //     setCatCountry(res.data.breeds[0].origin);
-            //     setAdaptability(res.data.breeds[0].adaptability);
-            // }).catch((error) => {
-            //     console.log(error);
-            // }
-            // );
-
-
-
-        }).catch((error) => {
-            console.log(error);
-        });
     }, []);
 
     return (
@@ -199,7 +163,6 @@ const HomeScreen = () => {
                                     }
                                 }
 
-
                                     style={tw('absolute top-0 h-full w-full rounded-xl')}
 
                                 />
@@ -222,7 +185,7 @@ const HomeScreen = () => {
                                             <Text style={styles.textCountry} >{card.origin}</Text>
                                         </View>
                                         <View>
-                                            <Text style={styles.textNumber} >{card.adaptability}</Text>
+                                            <Text style={styles.textNumber} >{card.affection_level}</Text>
                                         </View>
                                     </View>
 
@@ -231,7 +194,6 @@ const HomeScreen = () => {
                             </View>
                         )
                     }}
-
 
                 >
                 </Swiper>
